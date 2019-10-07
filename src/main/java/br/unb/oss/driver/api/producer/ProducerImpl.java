@@ -42,7 +42,10 @@ public class ProducerImpl implements Producer<Row> {
                     break;
                 }
             }
-            sendRow(row);
+            if (!sendRow(row)) {
+                // TODO: what to do on cancel
+                break;
+            }
         }
         /*       } catch (InterruptedException | ExecutionException ex) {
            Logger.getLogger(ProducerImpl.class.getName()).log(Level.SEVERE, null, ex);
@@ -88,17 +91,21 @@ public class ProducerImpl implements Producer<Row> {
         // queue.add(null);
     }
 
-    private void sendRow(@NonNull Row row) {
-        if (allowed == 0) {
+    private boolean sendRow(@NonNull Row row) {
+        if (allowed <= 0) {
             try {
-                allowed = queue.take(); // TODO:
+                Long newAllowed = queue.take();
+                if (newAllowed == 0) {
+                    return false;
+                }
+                allowed = newAllowed;
             } catch (InterruptedException ex) { // TODO:
                 Logger.getLogger(ProducerImpl.class.getName()).log(Level.SEVERE, null, ex);
             }
         }
         allowed--;
         consumer.consume(row);
-        //queue.add(row);
+        return true;
     }
 
     @Override
@@ -112,12 +119,14 @@ public class ProducerImpl implements Producer<Row> {
 
     @Override
     public void produce(long n) {
+        if (n <= 0) {
+            throw new IllegalArgumentException("You should request more than zero rows.");
+        } // TODO: checks
         queue.add(n); // TODO: ???
     }
 
     @Override
     public void cancel() {
-        throw new UnsupportedOperationException(
-                "Not supported yet."); // To change body of generated methods, choose Tools | Templates.
+        queue.add(0L);
     }
 }
