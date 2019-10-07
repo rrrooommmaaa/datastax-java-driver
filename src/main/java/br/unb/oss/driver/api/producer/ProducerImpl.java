@@ -11,17 +11,15 @@ import edu.umd.cs.findbugs.annotations.NonNull;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.CompletionStage;
 import java.util.concurrent.LinkedBlockingQueue;
-import java.util.concurrent.Semaphore;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
 public class ProducerImpl implements Producer<Row> {
 
     private final CompletionStage<AsyncResultSet> stage;
-    private Consumer consumer = null;
-    private final BlockingQueue<Long> queue = new LinkedBlockingQueue<>();
+    private volatile Consumer consumer = null;
+    private final BlockingQueue<Long> produceRequests = new LinkedBlockingQueue<>();
     private long allowed = 0;
-    // private final Semaphore semaphore = new Semaphore(0);
 
     private Void onError(Throwable error) {
 
@@ -30,7 +28,6 @@ public class ProducerImpl implements Producer<Row> {
     }
 
     private Void onResult(AsyncResultSet result) {
-        //       try {
         for (;;) {
             Row row = result.one();
             if (row == null) {
@@ -47,60 +44,32 @@ public class ProducerImpl implements Producer<Row> {
                 break;
             }
         }
-        /*       } catch (InterruptedException | ExecutionException ex) {
-           Logger.getLogger(ProducerImpl.class.getName()).log(Level.SEVERE, null, ex);
-           sendOperationAborted(ex);
-       }
-         */
         return null;
     }
 
-    /*
-    private void deque() {
-        for (;;) {
-            try {
-                Object obj = queue.take();
-                if (obj instanceof Row) {
-                    semaphore.acquire();
-                    consumer.consume(obj);
-                } else if (obj instanceof Throwable) {
-                    consumer.operationAborted((Throwable) obj);
-                    break;
-                } else {
-                    consumer.operationComplete();
-                    break;
-                }
-            } catch (InterruptedException ex) {
-                Logger.getLogger(ProducerImpl.class.getName()).log(Level.SEVERE, null, ex);
-                // TODO: ????
-            }
-        }
-    }
-     */
     ProducerImpl(CompletionStage<AsyncResultSet> stage) {
         this.stage = stage;
     }
 
     void sendOperationAborted(@NonNull Throwable error) {
         consumer.operationAborted(error);
-        // queue.add(error);
     }
 
     void sendOperationComplete() {
         consumer.operationComplete();
-        // queue.add(null);
     }
 
     private boolean sendRow(@NonNull Row row) {
         if (allowed <= 0) {
             try {
-                Long newAllowed = queue.take();
+                Long newAllowed = produceRequests.take();
                 if (newAllowed == 0) {
                     return false;
                 }
                 allowed = newAllowed;
-            } catch (InterruptedException ex) { // TODO:
+            } catch (InterruptedException ex) {
                 Logger.getLogger(ProducerImpl.class.getName()).log(Level.SEVERE, null, ex);
+                return false;
             }
         }
         allowed--;
@@ -109,24 +78,30 @@ public class ProducerImpl implements Producer<Row> {
     }
 
     @Override
-    public void register(Consumer<? super Row> consumer) {
+    public void register(@NonNull Consumer<? super Row> consumer) {
         if (this.consumer != null) {
             throw new IllegalStateException("Only one consumer is allowed to be registered.");
         }
-        this.consumer = consumer; // TODO: null?
+        this.consumer = consumer;
         stage.thenAcceptAsync(this::onResult).exceptionally(this::onError);
     }
 
     @Override
     public void produce(long n) {
+        if (this.consumer == null) {
+            throw new IllegalStateException("A consumer should be registered first.");
+        }
         if (n <= 0) {
             throw new IllegalArgumentException("You should request more than zero rows.");
-        } // TODO: checks
-        queue.add(n); // TODO: ???
+        }
+        produceRequests.add(n);
     }
 
     @Override
     public void cancel() {
-        queue.add(0L);
+        if (this.consumer == null) {
+            throw new IllegalStateException("A consumer should be registered first.");
+        }
+        produceRequests.add(0L);
     }
 }
