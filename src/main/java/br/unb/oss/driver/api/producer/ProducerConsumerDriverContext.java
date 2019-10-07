@@ -53,7 +53,7 @@ public class ProducerConsumerDriverContext extends DefaultDriverContext {
     return new RequestProcessorRegistry(
         getSessionName(),
 
-//        cqlRequestSyncProcessor,
+        cqlRequestAsyncProcessor,
 //        new CqlPrepareSyncProcessor(cqlPrepareAsyncProcessor),
             
             

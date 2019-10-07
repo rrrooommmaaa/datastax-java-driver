@@ -20,9 +20,9 @@ public class CustomRequestProcessor implements RequestProcessor<Request, Produce
   private static final GenericType<?> dummyType = GenericType.of(ProducerImpl.class);
 
   public static GenericType<?> getResultType() {
-      return dummyType;
+    return dummyType;
   }
-  
+
   CustomRequestProcessor(CqlRequestAsyncProcessor subProcessor) {
     this.subProcessor = subProcessor;
   }
