@@ -17,16 +17,19 @@ import com.datastax.oss.driver.internal.core.session.RequestProcessor;
 public class CustomRequestProcessor implements RequestProcessor<Request, Producer<Row>> {
 
   private final CqlRequestAsyncProcessor subProcessor;
+  private static final GenericType<?> dummyType = GenericType.of(ProducerImpl.class);
 
+  public static GenericType<?> getResultType() {
+      return dummyType;
+  }
+  
   CustomRequestProcessor(CqlRequestAsyncProcessor subProcessor) {
     this.subProcessor = subProcessor;
   }
 
   @Override
   public boolean canProcess(Request request, GenericType<?> resultType) {
-    return request
-        instanceof
-        Statement; // TODO: && resultType.isSubtypeOf(GenericType.of(type)Producer<?>.class);
+    return request instanceof Statement && resultType.equals(dummyType);
   }
 
   @Override

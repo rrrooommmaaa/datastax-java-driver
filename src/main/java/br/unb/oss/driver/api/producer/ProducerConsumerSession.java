@@ -2,7 +2,10 @@ package br.unb.oss.driver.api.producer;
 
 import com.datastax.oss.driver.api.core.CqlSession;
 import com.datastax.oss.driver.api.core.cql.Row;
+import com.datastax.oss.driver.api.core.cql.SimpleStatement;
 import com.datastax.oss.driver.api.core.cql.Statement;
+import com.datastax.oss.driver.api.core.type.reflect.GenericType;
+import com.datastax.oss.driver.internal.core.session.RequestProcessor;
 import edu.umd.cs.findbugs.annotations.NonNull;
 
 /** A session that executes CQL requests in a producer-consumer fashion. */
@@ -16,8 +19,8 @@ public interface ProducerConsumerSession extends CqlSession {
    */
   @NonNull
   default Producer<Row> produce(@NonNull String query) {
-    // TODO implement
-    return null;
+    Statement statement = SimpleStatement.newInstance(query);
+    return produce(statement);
   }
 
   /**
@@ -28,7 +31,7 @@ public interface ProducerConsumerSession extends CqlSession {
    */
   @NonNull
   default Producer<Row> produce(@NonNull Statement<?> statement) {
-    // TODO implement
-    return null;
+    Producer<Row> producer = (Producer<Row>)execute(statement, CustomRequestProcessor.getResultType());
+    return producer;
   }
 }
