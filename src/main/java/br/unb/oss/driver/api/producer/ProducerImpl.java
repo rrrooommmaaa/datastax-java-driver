@@ -19,12 +19,13 @@ public class ProducerImpl implements Producer<Row> {
 
     private final CompletionStage<AsyncResultSet> stage;
     private Consumer consumer = null;
-    private final BlockingQueue<Object> queue = new LinkedBlockingQueue<>();
-    private final Semaphore semaphore = new Semaphore(0);
+    private final BlockingQueue<Long> queue = new LinkedBlockingQueue<>();
+    private long allowed = 0;
+    // private final Semaphore semaphore = new Semaphore(0);
 
     private Void onError(Throwable error) {
 
-        sendOperationAborted(error);
+        sendOperationAborted(error.getCause());
         return null;
     }
 
@@ -34,7 +35,7 @@ public class ProducerImpl implements Producer<Row> {
             Row row = result.one();
             if (row == null) {
                 if (result.hasMorePages()) {
-                    result.fetchNextPage().thenAccept(this::onResult).exceptionally(this::onError);
+                    result.fetchNextPage().thenAcceptAsync(this::onResult).exceptionally(this::onError);
                     break;
                 } else {
                     sendOperationComplete();
@@ -51,6 +52,7 @@ public class ProducerImpl implements Producer<Row> {
         return null;
     }
 
+    /*
     private void deque() {
         for (;;) {
             try {
@@ -71,7 +73,7 @@ public class ProducerImpl implements Producer<Row> {
             }
         }
     }
-
+     */
     ProducerImpl(CompletionStage<AsyncResultSet> stage) {
         this.stage = stage;
     }
@@ -87,11 +89,14 @@ public class ProducerImpl implements Producer<Row> {
     }
 
     private void sendRow(@NonNull Row row) {
-        try {
-            semaphore.acquire(); // TODO:
-        } catch (InterruptedException ex) { // TODO:
-            Logger.getLogger(ProducerImpl.class.getName()).log(Level.SEVERE, null, ex);
+        if (allowed == 0) {
+            try {
+                allowed = queue.take(); // TODO:
+            } catch (InterruptedException ex) { // TODO:
+                Logger.getLogger(ProducerImpl.class.getName()).log(Level.SEVERE, null, ex);
+            }
         }
+        allowed--;
         consumer.consume(row);
         //queue.add(row);
     }
@@ -102,12 +107,12 @@ public class ProducerImpl implements Producer<Row> {
             throw new IllegalStateException("Only one consumer is allowed to be registered.");
         }
         this.consumer = consumer; // TODO: null?
-        stage.thenAccept(this::onResult).exceptionally(this::onError);
+        stage.thenAcceptAsync(this::onResult).exceptionally(this::onError);
     }
 
     @Override
     public void produce(long n) {
-        semaphore.release((int) n); // TODO: ???
+        queue.add(n); // TODO: ???
     }
 
     @Override
