@@ -274,9 +274,9 @@ public class MyCcmBridge implements AutoCloseable {
   synchronized void execute(String... args) {
     String command =
         "python /dev/ccm.py "
-            + String.join(" ", args)
-            + " --config-dir="
-            + configDirectory.toFile().getAbsolutePath();
+            + String.join(" ", args);
+            // + " --config-dir="
+            // + configDirectory.toFile().getAbsolutePath();
 
     execute(CommandLine.parse(command));
   }
@@ -288,7 +288,7 @@ public class MyCcmBridge implements AutoCloseable {
     for (String arg : args) {
       cli.addArgument(arg, false);
     }
-    cli.addArgument("--config-dir=" + configDirectory.toFile().getAbsolutePath());
+//    cli.addArgument("--config-dir=" + configDirectory.toFile().getAbsolutePath());
 
     execute(cli);
   }
@@ -320,10 +320,7 @@ public class MyCcmBridge implements AutoCloseable {
         logger.error(
             "Non-zero exit code ({}) returned from executing ccm command: {}", retValue, cli);
       }
-    } catch (ExecuteException ex) {
-        logger.warn("exec");
-    }
-    catch (IOException ex) {
+    } catch (IOException ex) {
       if (watchDog.killedProcess()) {
         throw new RuntimeException("The command '" + cli + "' was killed after 10 minutes");
       } else {
