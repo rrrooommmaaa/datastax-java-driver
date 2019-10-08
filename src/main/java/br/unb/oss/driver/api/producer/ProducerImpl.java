@@ -5,6 +5,8 @@ import com.datastax.oss.driver.api.core.cql.Row;
 import edu.umd.cs.findbugs.annotations.NonNull;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.CompletionStage;
+import java.util.concurrent.Executor;
+import java.util.concurrent.Executors;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -21,12 +23,14 @@ public class ProducerImpl implements Producer<Row> {
         return null;
     }
 
+    private static Executor executor = Executors.newCachedThreadPool();
+    
     private Void onResult(AsyncResultSet result) {
         for (;;) {
             Row row = result.one();
             if (row == null) {
                 if (result.hasMorePages()) {
-                    result.fetchNextPage().thenAcceptAsync(this::onResult).exceptionally(this::onError);
+                    result.fetchNextPage().thenAcceptAsync(this::onResult, executor).exceptionally(this::onError);
                     break;
                 } else {
                     sendOperationComplete();
@@ -77,7 +81,7 @@ public class ProducerImpl implements Producer<Row> {
             throw new IllegalStateException("Only one consumer is allowed to be registered.");
         }
         this.consumer = consumer;
-        stage.thenAcceptAsync(this::onResult).exceptionally(this::onError);
+        stage.thenAcceptAsync(this::onResult, executor).exceptionally(this::onError);
     }
 
     @Override
