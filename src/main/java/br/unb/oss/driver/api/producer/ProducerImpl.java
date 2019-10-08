@@ -1,8 +1,3 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
 package br.unb.oss.driver.api.producer;
 
 import com.datastax.oss.driver.api.core.cql.AsyncResultSet;
@@ -19,10 +14,9 @@ public class ProducerImpl implements Producer<Row> {
     private final CompletionStage<AsyncResultSet> stage;
     private volatile Consumer consumer = null;
     private final BlockingQueue<Long> produceRequests = new LinkedBlockingQueue<>();
-    private long allowed = 0;
+    private volatile long allowed = 0;
 
     private Void onError(Throwable error) {
-
         sendOperationAborted(error.getCause());
         return null;
     }
@@ -40,14 +34,14 @@ public class ProducerImpl implements Producer<Row> {
                 }
             }
             if (!sendRow(row)) {
-                // TODO: what to do on cancel
+                // Cancelled
                 break;
             }
         }
         return null;
     }
 
-    ProducerImpl(CompletionStage<AsyncResultSet> stage) {
+    public ProducerImpl(CompletionStage<AsyncResultSet> stage) {
         this.stage = stage;
     }
 
@@ -64,7 +58,7 @@ public class ProducerImpl implements Producer<Row> {
             try {
                 Long newAllowed = produceRequests.take();
                 if (newAllowed == 0) {
-                    return false;
+                    return false; // cancel signalled
                 }
                 allowed = newAllowed;
             } catch (InterruptedException ex) {
