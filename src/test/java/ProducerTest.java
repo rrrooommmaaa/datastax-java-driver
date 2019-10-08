@@ -11,36 +11,15 @@ import com.datastax.oss.driver.api.core.servererrors.InvalidQueryException;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionStage;
-import java.util.concurrent.Executor;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.ForkJoinPool;
-import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
-import org.junit.After;
-import org.junit.Before;
 import org.junit.Test;
 import org.mockito.*;
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
 import org.mockito.internal.stubbing.answers.ReturnsElementsOf;
 
-public class ProducerTest {
-
-    ExecutorService executor;
-    
-    @Before
-    public void create_executor() {
-        executor = Executors.newSingleThreadExecutor();
-    }
-
-    @After
-    public void kill_executor() {
-        List<Runnable> result = executor.shutdownNow();
-    }
-
-    
+public class ProducerTest {   
     @Test
     public void should_consume_requested_number_of_rows_from_unlimited_supply() {
         Consumer<Row> consumer = (Consumer<Row>) mock(Consumer.class);
@@ -49,7 +28,7 @@ public class ProducerTest {
         when(asyncResultSet.one()).thenReturn(mock(Row.class));
         when(asyncResultSet.hasMorePages()).thenReturn(false);
 
-        CompletionStage<AsyncResultSet> stage = CompletableFuture.supplyAsync(() -> asyncResultSet, executor);
+        CompletionStage<AsyncResultSet> stage = CompletableFuture.supplyAsync(() -> asyncResultSet);
         Producer<Row> producer = new ProducerImpl(stage);
         producer.register(consumer);
         producer.produce(10);
@@ -71,7 +50,7 @@ public class ProducerTest {
         when(asyncResultSet.one()).thenAnswer(new ReturnsElementsOf(create_page(size)));
         when(asyncResultSet.hasMorePages()).thenReturn(false);
 
-        CompletionStage<AsyncResultSet> stage = CompletableFuture.supplyAsync(() -> asyncResultSet, executor);
+        CompletionStage<AsyncResultSet> stage = CompletableFuture.supplyAsync(() -> asyncResultSet);
         Producer<Row> producer = new ProducerImpl(stage);
         return producer;
     }
@@ -101,7 +80,7 @@ public class ProducerTest {
         when(asyncResultSet.one()).thenAnswer(new ReturnsElementsOf(create_page(PAGE_SIZE)));
         when(asyncResultSet.hasMorePages()).thenReturn(true);
         when(asyncResultSet.fetchNextPage()).thenAnswer(invocation -> generateChainPage());
-        return CompletableFuture.supplyAsync(() -> asyncResultSet, executor);
+        return CompletableFuture.supplyAsync(() -> asyncResultSet);
     }
 
     @Test
@@ -141,7 +120,7 @@ public class ProducerTest {
                 .operationAborted(any(InvalidQueryException.class));
 
     }
-/*
+
     @Test(expected = IllegalStateException.class)
     public void should_throw_when_registering_two_consumers() {
         Consumer<Row> consumer1 = (Consumer<Row>) mock(Consumer.class);
@@ -153,7 +132,7 @@ public class ProducerTest {
 
         producer.produce(10);
     }
-*/
+
     @Test(expected = IllegalStateException.class)
     public void should_throw_when_requesting_before_registration() {
         Producer<Row> producer = generate_limited_producer(10);
@@ -170,7 +149,7 @@ public class ProducerTest {
 
         producer.produce(-1);
     }
-/*
+
     @Test(expected = IllegalArgumentException.class)
     public void should_throw_when_requesting_zero_qty() {
         Consumer<Row> consumer = (Consumer<Row>) mock(Consumer.class);
@@ -180,5 +159,5 @@ public class ProducerTest {
 
         producer.produce(0);
     }
-*/
+
 }

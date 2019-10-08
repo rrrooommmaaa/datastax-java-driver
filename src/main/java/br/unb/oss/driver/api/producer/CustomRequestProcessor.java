@@ -39,9 +39,6 @@ public class CustomRequestProcessor implements RequestProcessor<Request, Produce
       InternalDriverContext context,
       String sessionLogPrefix) {
     Statement statement = (Statement) request;
-    /*
-       AsyncResultSet result =
-    CompletableFutures.getUninterruptibly( */
     ProducerImpl producer =
         new ProducerImpl(subProcessor.process(statement, session, context, sessionLogPrefix));
     return producer;
