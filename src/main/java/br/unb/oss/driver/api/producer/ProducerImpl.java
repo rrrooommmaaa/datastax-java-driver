@@ -16,7 +16,7 @@ public class ProducerImpl implements Producer<Row> {
     private final CompletionStage<AsyncResultSet> stage;
     private volatile Consumer consumer = null;
     private final BlockingQueue<Long> produceRequests = new LinkedBlockingQueue<>();
-    private volatile long allowed = 0;
+    private long allowed = 0;
 
     private Void onError(Throwable error) {
         sendOperationAborted(error.getCause());
