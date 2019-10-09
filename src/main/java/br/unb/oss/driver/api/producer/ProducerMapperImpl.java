@@ -32,8 +32,8 @@ public class ProducerMapperImpl<T,U,V> extends ProducerBase<U,V> implements Cons
         if (this.consumer != null) {
             throw new IllegalStateException("Only one consumer is allowed to be registered.");
         }
-        producer.register(this);
         this.consumer = consumer;
+        producer.register(this); // start execution
     }
 
     @Override
