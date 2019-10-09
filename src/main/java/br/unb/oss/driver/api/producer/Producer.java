@@ -1,6 +1,9 @@
 package br.unb.oss.driver.api.producer;
 
 import edu.umd.cs.findbugs.annotations.NonNull;
+import java.util.function.BiFunction;
+import java.util.function.Function;
+import java.util.function.Predicate;
 
 /**
  * A Producer of items in a typical producer-consumer pattern.
@@ -51,12 +54,10 @@ public interface Producer<T> {
    */
   void cancel();
 
-  // TODO bonus work: implement functional methods such as:
+  <U> Producer<U> map(Function<T,U> mapper);
 
-  //  <U> Producer<U> map(Function<T,U> mapper);
-  //
-  //  Producer<T> reduce(BiFunction<T,T,T> reducer);
-  //
-  //  Producer<T> filter(Predicate<T> filter);
+  Producer<T> reduce(BiFunction<T,T,T> reducer);
+
+  Producer<T> filter(Predicate<T> filter);
 
 }

@@ -11,7 +11,7 @@ import java.util.concurrent.LinkedBlockingQueue;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-public class ProducerImpl implements Producer<Row> {
+public class ProducerImpl<U> extends ProducerBase<Row, U> implements Producer<Row> {
 
     private final CompletionStage<AsyncResultSet> stage;
     private volatile Consumer consumer = null;
