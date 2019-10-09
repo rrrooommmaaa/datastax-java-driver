@@ -1,16 +1,15 @@
+import static org.assertj.core.api.Assertions.assertThat;
+
 import br.unb.oss.driver.api.producer.Producer;
 import br.unb.oss.driver.api.producer.ProducerConsumerSession;
 import br.unb.oss.driver.api.producer.ProducerConsumerSessionBuilder;
 import br.unb.oss.driver.api.producer.TestConsumer;
-import static org.assertj.core.api.Assertions.assertThat;
-
 import com.datastax.oss.driver.api.core.CqlSession;
 import com.datastax.oss.driver.api.core.config.DefaultDriverOption;
 import com.datastax.oss.driver.api.core.config.DriverConfigLoader;
 import com.datastax.oss.driver.api.core.cql.Row;
 import com.datastax.oss.driver.api.core.cql.SimpleStatement;
 import com.datastax.oss.driver.api.core.servererrors.InvalidQueryException;
-import com.datastax.oss.driver.api.testinfra.ccm.CcmRule;
 import com.datastax.oss.driver.api.testinfra.session.SessionRule;
 import com.datastax.oss.driver.api.testinfra.session.SessionUtils;
 import com.datastax.oss.driver.categories.ParallelizableTests;

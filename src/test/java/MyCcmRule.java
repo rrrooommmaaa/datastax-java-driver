@@ -1,4 +1,3 @@
-
 import com.datastax.oss.driver.categories.ParallelizableTests;
 import java.lang.reflect.Method;
 import org.junit.AssumptionViolatedException;

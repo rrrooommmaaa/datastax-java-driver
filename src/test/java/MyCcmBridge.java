@@ -1,4 +1,3 @@
-  
 /*
  * Copyright DataStax, Inc.
  *
@@ -39,7 +38,6 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.stream.Collectors;
 import org.apache.commons.exec.CommandLine;
 import org.apache.commons.exec.DefaultExecutor;
-import org.apache.commons.exec.ExecuteException;
 import org.apache.commons.exec.ExecuteStreamHandler;
 import org.apache.commons.exec.ExecuteWatchdog;
 import org.apache.commons.exec.Executor;
@@ -209,7 +207,6 @@ public class MyCcmBridge implements AutoCloseable {
           Arrays.stream(nodes).mapToObj(n -> "" + n).collect(Collectors.joining(":")),
           createOptions.stream().collect(Collectors.joining(" ")));
 
-
       for (Map.Entry<String, Object> conf : cassandraConfiguration.entrySet()) {
         execute("updateconf", String.format("%s:%s", conf.getKey(), conf.getValue()));
       }
@@ -227,7 +224,6 @@ public class MyCcmBridge implements AutoCloseable {
           execute("setworkload", String.join(",", dseWorkloads));
         }
       }
-
     }
   }
 
@@ -272,11 +268,9 @@ public class MyCcmBridge implements AutoCloseable {
   }
 
   synchronized void execute(String... args) {
-    String command =
-        "python /dev/ccm.py "
-            + String.join(" ", args);
-            // + " --config-dir="
-            // + configDirectory.toFile().getAbsolutePath();
+    String command = "python /dev/ccm.py " + String.join(" ", args);
+    // + " --config-dir="
+    // + configDirectory.toFile().getAbsolutePath();
 
     execute(CommandLine.parse(command));
   }
@@ -288,7 +282,7 @@ public class MyCcmBridge implements AutoCloseable {
     for (String arg : args) {
       cli.addArgument(arg, false);
     }
-//    cli.addArgument("--config-dir=" + configDirectory.toFile().getAbsolutePath());
+    //    cli.addArgument("--config-dir=" + configDirectory.toFile().getAbsolutePath());
 
     execute(cli);
   }
@@ -326,7 +320,7 @@ public class MyCcmBridge implements AutoCloseable {
       } else {
         throw new RuntimeException("The command '" + cli + "' failed to execute", ex);
       }
-    } 
+    }
   }
 
   @Override
