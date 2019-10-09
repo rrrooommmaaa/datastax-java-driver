@@ -54,10 +54,9 @@ public interface Producer<T> {
    */
   void cancel();
 
-  <U> Producer<U> map(Function<T,U> mapper);
+  <U> Producer<U> map(Function<T, U> mapper);
 
-  Producer<T> reduce(BiFunction<T,T,T> reducer);
+  Producer<T> reduce(BiFunction<T, T, T> reducer);
 
   Producer<T> filter(Predicate<T> filter);
-
 }

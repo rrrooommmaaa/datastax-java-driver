@@ -39,14 +39,14 @@ public class ProducerConsumerDriverContext extends DefaultDriverContext {
   public RequestProcessorRegistry buildRequestProcessorRegistry() {
 
     CqlRequestAsyncProcessor cqlRequestAsyncProcessor = new CqlRequestAsyncProcessor();
-//    CqlPrepareAsyncProcessor cqlPrepareAsyncProcessor = new CqlPrepareAsyncProcessor();
-//    CqlRequestSyncProcessor cqlRequestSyncProcessor = new CqlRequestSyncProcessor(cqlRequestAsyncProcessor);
+    //    CqlPrepareAsyncProcessor cqlPrepareAsyncProcessor = new CqlPrepareAsyncProcessor();
+    //    CqlRequestSyncProcessor cqlRequestSyncProcessor = new
+    // CqlRequestSyncProcessor(cqlRequestAsyncProcessor);
 
     return new RequestProcessorRegistry(
         getSessionName(),
-
         cqlRequestAsyncProcessor,
-//        new CqlPrepareSyncProcessor(cqlPrepareAsyncProcessor),
+        //        new CqlPrepareSyncProcessor(cqlPrepareAsyncProcessor),
 
         new CustomRequestProcessor(cqlRequestAsyncProcessor));
   }
