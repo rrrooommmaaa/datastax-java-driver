@@ -2,14 +2,14 @@ package br.unb.oss.driver.api.producer;
 
 import java.util.function.Function;
 
-public class ProducerMapperImpl<T,U,X> extends ProducerBase<U,X> implements Consumer<T>, Producer<U> {
+public class ProducerMapperImpl<T,U,V> extends ProducerBase<U,V> implements Consumer<T>, Producer<U> {
     private final Function<T,U> mapper;
     private Consumer<? super U> consumer = null;
     private final Producer<T> producer;
 
     public ProducerMapperImpl(Producer<T> producer, Function<T,U> mapper) {
         this.producer = producer;
-        this.mapper =  mapper;
+        this.mapper = mapper;
     }
     
     @Override
@@ -32,8 +32,8 @@ public class ProducerMapperImpl<T,U,X> extends ProducerBase<U,X> implements Cons
         if (this.consumer != null) {
             throw new IllegalStateException("Only one consumer is allowed to be registered.");
         }
-        this.consumer = consumer;
         producer.register(this);
+        this.consumer = consumer;
     }
 
     @Override
