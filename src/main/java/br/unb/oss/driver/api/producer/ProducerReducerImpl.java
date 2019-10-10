@@ -1,14 +1,9 @@
 package br.unb.oss.driver.api.producer;
 
-import com.datastax.oss.driver.api.core.cql.AsyncResultSet;
-import com.datastax.oss.driver.api.core.cql.Row;
-import java.util.concurrent.CompletionStage;
 import java.util.concurrent.Executor;
-import java.util.concurrent.Executors;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.function.BiFunction;
-import java.util.function.Predicate;
 
 public class ProducerReducerImpl<T, U> extends ProducerBase<T> implements Consumer<T>, Producer<T> {
 
@@ -18,10 +13,10 @@ public class ProducerReducerImpl<T, U> extends ProducerBase<T> implements Consum
 
     private final AtomicLong allowed = new AtomicLong(0);
     private final AtomicInteger wip = new AtomicInteger(0);
-    
+
     private volatile T result = null;
     private volatile boolean complete = false;
-    
+
     private void drain() {
         if (wip.getAndIncrement() == 0) {
             do {
@@ -40,7 +35,7 @@ public class ProducerReducerImpl<T, U> extends ProducerBase<T> implements Consum
             if (result == null) {
                 // flush operation complete without waiting for allowed rows
                 flushOperationComplete();
-            } else if (allowed.get()>0) {
+            } else if (allowed.get() > 0) {
                 consumer.consume(result);
                 allowed.decrementAndGet(); // not really necessary
                 flushOperationComplete();
@@ -80,7 +75,7 @@ public class ProducerReducerImpl<T, U> extends ProducerBase<T> implements Consum
         }
         this.consumer = consumer;
         parentProducer.register(this);
-        parentProducer.produce(Long.MAX_VALUE); 
+        parentProducer.produce(Long.MAX_VALUE);
     }
 
     @Override

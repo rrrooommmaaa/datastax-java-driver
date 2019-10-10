@@ -1,4 +1,7 @@
 
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
+
 import br.unb.oss.driver.api.producer.Producer;
 import br.unb.oss.driver.api.producer.ProducerImpl;
 import com.datastax.oss.driver.api.core.CqlSession;
@@ -23,8 +26,6 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionStage;
 import org.junit.Before;
 import org.mockito.Mock;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
 import org.mockito.MockitoAnnotations;
 
 public class TestBase {
@@ -67,6 +68,7 @@ public class TestBase {
         }
         return data;
     }
+
     static final int PAGE_SIZE = 10;
 
     protected CompletionStage<AsyncResultSet> generateChainPage() {
@@ -94,5 +96,4 @@ public class TestBase {
         Producer<Row> producer = new ProducerImpl(stage);
         return producer;
     }
-
 }

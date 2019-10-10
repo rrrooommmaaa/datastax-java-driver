@@ -20,6 +20,6 @@ public abstract class ProducerBase<T> implements Producer<T> {
   public Producer<T> filter(Predicate<T> filter) {
     return new ProducerFilterImpl(this, filter);
   }
-  
+
   abstract Executor getExecutor();
 }
