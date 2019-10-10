@@ -1,6 +1,7 @@
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.after;
+import static org.mockito.Mockito.inOrder;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -13,6 +14,7 @@ import com.datastax.oss.driver.api.core.cql.Row;
 import java.util.concurrent.CompletionStage;
 import java.util.function.Predicate;
 import org.junit.Test;
+import org.mockito.InOrder;
 
 public class ProducerFilterTest extends TestBase {
 
@@ -48,5 +50,10 @@ public class ProducerFilterTest extends TestBase {
 
         // verify that consumer.operationComplete was called exactly 1 time
         verify(consumer, times(1)).operationComplete();
+
+        // check order
+        InOrder inOrder = inOrder(consumer);
+        inOrder.verify(consumer).consume(any());
+        inOrder.verify(consumer).operationComplete();
     }
 }

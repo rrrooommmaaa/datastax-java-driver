@@ -5,7 +5,7 @@ import com.datastax.oss.driver.api.core.cql.Row;
 import edu.umd.cs.findbugs.annotations.NonNull;
 import java.util.concurrent.CompletionStage;
 import java.util.concurrent.Executor;
-import java.util.concurrent.Executors;
+import java.util.concurrent.ForkJoinPool;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
 
@@ -23,7 +23,7 @@ public class ProducerImpl<U> extends ProducerBase<Row> implements Producer<Row> 
         return null;
     }
 
-    private static Executor executor = Executors.newCachedThreadPool();
+    private static Executor executor = ForkJoinPool.commonPool();
 
     private void drain() {
         if (wip.getAndIncrement() == 0) {
