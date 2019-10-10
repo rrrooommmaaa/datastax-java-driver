@@ -28,9 +28,12 @@ public class CountTest extends TestBase {
         producer.register(consumer);
         producer.produce(1);
 
+        // verify that consumer.consume was called exactly 1 time with COUNT value
+        verify(consumer, after(2000).times(1)).consume(COUNT);
+        verify(consumer, times(1)).operationComplete();
+        
         // check order
         InOrder inOrder = inOrder(consumer);
-        // verify that consumer.consume was called exactly 1 time with COUNT value
         inOrder.verify(consumer, times(1)).consume(COUNT);
         inOrder.verify(consumer).operationComplete();
     }

@@ -28,8 +28,12 @@ public class ProducerReducerTest extends TestBase {
         producer.register(consumer);
         producer.produce(1);
 
+        // verify that consumer.consume was called exactly once
+        verify(consumer, after(2000).times(1)).consume(any());
+        verify(consumer, times(1)).operationComplete();
+        
         InOrder inOrder = inOrder(consumer);
-        // verify that consumer.consume was called exactly 10 times
+        // verify that consumer.consume was called exactly once
         inOrder.verify(consumer, times(1)).consume(any());
         inOrder.verify(consumer).operationComplete();
     }

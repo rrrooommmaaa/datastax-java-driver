@@ -36,8 +36,12 @@ public class ProducerTest extends TestBase {
         producer.register(consumer);
         producer.produce(20);
 
-        InOrder inOrder = inOrder(consumer);
         // verify that consumer.consume was called exactly 10 times
+        verify(consumer, after(6000).times(10)).consume(any());
+        // verify that consumer.operationComplete was called 1 time
+        verify(consumer, times(1)).operationComplete();
+
+        InOrder inOrder = inOrder(consumer);
         inOrder.verify(consumer, times(10)).consume(any());
         inOrder.verify(consumer).operationComplete();
     }
